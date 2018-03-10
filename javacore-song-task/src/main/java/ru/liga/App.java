@@ -4,6 +4,7 @@ import ru.liga.songtask.content.Content;
 import ru.liga.songtask.domain.Note;
 import ru.liga.songtask.domain.SimpleMidiFile;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -49,17 +50,21 @@ public class App {
         System.out.println("диапазон: " + topNote.sign().diffInSemitones(bottomNote.sign()));
     }
 
-    private static void printNoteDurationAnalysis(List<Note> vocalNoteList) {
+    private static void printNoteDurationAnalysis(List<Note> vocalNoteList,
+                                                  SimpleMidiFile simpleMidiFile) {
         System.out.println("Анализ длительности нот (мс):");
         List<Note> lst = new ArrayList<>(vocalNoteList);
         lst.sort(Comparator.comparingLong(Note::durationTicks).reversed());
         int cnt = 0;
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
         for (int i = 0; i < lst.size(); i++) {
             cnt++;
             Note curNote = lst.get(i);
             if (i == lst.size() - 1 ||
                     !lst.get(i + 1).durationTicks().equals(curNote.durationTicks())) {
-                System.out.println(curNote.durationTicks() + ": " + cnt);
+                Float duration = curNote.durationTicks() * simpleMidiFile.tickInMs();
+                String s = decimalFormat.format(duration);
+                System.out.println(s + ": " + cnt);
                 cnt = 0;
             }
         }
@@ -102,12 +107,13 @@ public class App {
 
     public static void main(String[] args) {
         SimpleMidiFile simpleMidiFile = new SimpleMidiFile(Content.ZOMBIE);
+        System.out.println("Длительность (сек): " + simpleMidiFile.durationMs() / 1000);
         List<Note> vocalNoteList = simpleMidiFile.vocalNoteList();
         System.out.println("Всего нот: " + vocalNoteList.size());
         System.out.println();
         printRangeAnalysis(vocalNoteList);
         System.out.println();
-        printNoteDurationAnalysis(vocalNoteList);
+        printNoteDurationAnalysis(vocalNoteList, simpleMidiFile);
         System.out.println();
         printNoteHeightAnalysis(vocalNoteList);
         System.out.println();
