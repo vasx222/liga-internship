@@ -12,16 +12,25 @@ public class StudentService {
      * @param students студенты, ожидающие перевода
      * @return студенты которых удалось перевести на следующий курс или окончить обучение
      */
+
     public List<Student> transferStudentsToNextCourse(List<Student> students) {
         List<Student> resultList = new ArrayList<>();
         for (Student student : students) {
             if (student.getAllExamsPassed()) {
+                Student st;
                 if (student.getCourse().equals(5)) {
-                    student.setFinished(true);
+                    st = new Student(student.getCourse(),
+                            student.getFio(), student.getBirthDate(),
+                            student.getAllExamsPassed(), true);
+                    //student.setFinished(true);
+
                 } else {
-                    student.setCourse(student.getCourse() + 1);
+                    st = new Student(student.getCourse() + 1,
+                            student.getFio(), student.getBirthDate(),
+                            student.getAllExamsPassed(), student.getFinished());
+                    //student.setCourse(student.getCourse() + 1);
                 }
-                resultList.add(student);
+                resultList.add(st);
             }
         }
         return resultList;
