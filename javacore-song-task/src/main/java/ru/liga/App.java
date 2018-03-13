@@ -4,7 +4,6 @@ import ru.liga.songtask.content.Content;
 import ru.liga.songtask.domain.Note;
 import ru.liga.songtask.domain.SimpleMidiFile;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.DecimalFormat;
@@ -38,8 +37,7 @@ import org.slf4j.LoggerFactory;
  * 11: 2
  */
 public class App {
-    private static void printRangeAnalysis(List<Note> vocalNoteList, Writer writer)
-            throws IOException {
+    private static void printRangeAnalysis(List<Note> vocalNoteList) {
         Note bottomNote = null, topNote = null;
         for (Note note : vocalNoteList) {
             if (topNote == null ||
@@ -51,16 +49,15 @@ public class App {
                 bottomNote = note;
             }
         }
-        writer.write("Анализ диапазона:" + "\n");
-        writer.write("верхняя: " + bottomNote.sign().fullName() + "\n");
-        writer.write("нижняя: " + topNote.sign().fullName() + "\n");
-        writer.write("диапазон: " + topNote.sign().diffInSemitones(bottomNote.sign()) + "\n");
+        logger.info("Анализ диапазона:");
+        logger.info("верхняя: " + bottomNote.sign().fullName());
+        logger.info("нижняя: " + topNote.sign().fullName());
+        logger.info("диапазон: " + topNote.sign().diffInSemitones(bottomNote.sign()));
     }
 
     private static void printNoteDurationAnalysis(List<Note> vocalNoteList,
-                                                  SimpleMidiFile simpleMidiFile,
-                                                  Writer writer) throws IOException {
-        writer.write("Анализ длительности нот (мс):" + "\n");
+                                                  SimpleMidiFile simpleMidiFile)  {
+        logger.info("Анализ длительности нот (мс):");
         List<Note> lst = new ArrayList<>(vocalNoteList);
         lst.sort(Comparator.comparingLong(Note::durationTicks).reversed());
         int cnt = 0;
@@ -72,14 +69,14 @@ public class App {
                     !lst.get(i + 1).durationTicks().equals(curNote.durationTicks())) {
                 Float duration = curNote.durationTicks() * simpleMidiFile.tickInMs();
                 String s = decimalFormat.format(duration);
-                writer.write(s + ": " + cnt + "\n");
+                logger.info(s + ": " + cnt);
                 cnt = 0;
             }
         }
     }
 
-    private static void printNoteHeightAnalysis(List<Note> vocalNoteList, Writer writer) throws IOException {
-        writer.write("Анализ нот по высоте:" + "\n");
+    private static void printNoteHeightAnalysis(List<Note> vocalNoteList)  {
+        logger.info("Анализ нот по высоте:");
         List<Note> lst = new ArrayList<>(vocalNoteList);
         lst.sort(Comparator.comparingDouble(note -> note.sign().getFrequencyHz()));
         int cnt = 0;
@@ -89,13 +86,14 @@ public class App {
             if (i == lst.size() - 1 ||
                     !lst.get(i + 1).sign().getFrequencyHz().
                             equals(curNote.sign().getFrequencyHz())) {
-                writer.write(curNote.sign().fullName() + ": " + cnt + "\n");
+                logger.info(curNote.sign().fullName() + ": " + cnt);
                 cnt = 0;
             }
         }
     }
 
-    private static void printIntervalAnalysis(List<Note> vocalNoteList, Writer writer) throws IOException {
+    private static void printIntervalAnalysis(List<Note> vocalNoteList)
+             {
         Map<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < vocalNoteList.size() - 1; i++) {
             Note curNote = vocalNoteList.get(i);
@@ -107,36 +105,23 @@ public class App {
             }
             map.put(diff, cnt + 1);
         }
-        writer.write("Анализ интервалов:" + "\n");
+        logger.info("Анализ интервалов:");
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
+            logger.info(entry.getKey() + ": " + entry.getValue());
         }
     }
 
     private static Logger logger = LoggerFactory.getLogger( App.class );
 
     public static void main(String[] args) {
-        logger.info("Check my logger");
-
-        String fileName = "log.txt";
-        try (Writer writer = new FileWriter(fileName, false)) {
             SimpleMidiFile simpleMidiFile = new SimpleMidiFile(Content.ZOMBIE);
-            writer.write("Длительность (сек): " +
-                    simpleMidiFile.durationMs() / 1000 + "\n");
+            logger.info("Длительность (сек): " +
+                    simpleMidiFile.durationMs() / 1000);
             List<Note> vocalNoteList = simpleMidiFile.vocalNoteList();
-            writer.write("Всего нот: " + vocalNoteList.size() + "\n");
-            writer.write("\n");
-            printRangeAnalysis(vocalNoteList, writer);
-            writer.write("\n");
-            printNoteDurationAnalysis(vocalNoteList, simpleMidiFile, writer);
-            writer.write("\n");
-            printNoteHeightAnalysis(vocalNoteList, writer);
-            writer.write("\n");
-            printIntervalAnalysis(vocalNoteList, writer);
-
-            writer.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            logger.info("Всего нот: " + vocalNoteList.size());
+            printRangeAnalysis(vocalNoteList);
+            printNoteDurationAnalysis(vocalNoteList, simpleMidiFile);
+            printNoteHeightAnalysis(vocalNoteList);
+            printIntervalAnalysis(vocalNoteList);
     }
 }
