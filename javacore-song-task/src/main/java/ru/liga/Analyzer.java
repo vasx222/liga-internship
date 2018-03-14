@@ -152,14 +152,12 @@ public class Analyzer {
                 if (midiEvent.getClass().equals(NoteOn.class)) {
                     NoteOn noteOn = (NoteOn)midiEvent;
                     noteOn.setNoteValue(noteOn.getNoteValue() + trans);
-                    System.out.println("ok1!");
                     noteOn.setVelocity(noteOn.getVelocity() * (100 + tempo) / 100);
                     continue;
                 }
                 if (midiEvent.getClass().equals(NoteOff.class)) {
                     NoteOff noteOff = (NoteOff)midiEvent;
                     noteOff.setNoteValue(noteOff.getNoteValue() + trans);
-                    System.out.println("ok2!");
                     noteOff.setVelocity(noteOff.getVelocity() * (100 + tempo) / 100);
                 }
             }
