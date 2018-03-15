@@ -138,27 +138,27 @@ public class Analyzer {
     public void change(int trans, int tempo) {
         MidiFile midiFile = simpleMidiFile.getMidiFormat();
 
-/*        for (MidiTrack midiTrack : midiFile.getTracks()) {
+        for (MidiTrack midiTrack : midiFile.getTracks()) {
             for (MidiEvent midiEvent : midiTrack.getEvents()) {
                 if (midiEvent.getClass().equals(Tempo.class)) {
                     Tempo tempoEvent = (Tempo) midiEvent;
                     tempoEvent.setBpm(tempoEvent.getBpm() * (100 + tempo) / 100);
                 }
             }
-        }*/
+        }
 
         for (MidiTrack midiTrack : midiFile.getTracks()) {
             for (MidiEvent midiEvent : midiTrack.getEvents()) {
                 if (midiEvent.getClass().equals(NoteOn.class)) {
                     NoteOn noteOn = (NoteOn)midiEvent;
                     noteOn.setNoteValue(noteOn.getNoteValue() + trans);
-                    noteOn.setVelocity(noteOn.getVelocity() * (100 + tempo) / 100);
+                    //noteOn.setVelocity(noteOn.getVelocity() * (100 + tempo) / 100);
                     continue;
                 }
                 if (midiEvent.getClass().equals(NoteOff.class)) {
                     NoteOff noteOff = (NoteOff)midiEvent;
                     noteOff.setNoteValue(noteOff.getNoteValue() + trans);
-                    noteOff.setVelocity(noteOff.getVelocity() * (100 + tempo) / 100);
+                    //noteOff.setVelocity(noteOff.getVelocity() * (100 + tempo) / 100);
                 }
             }
         }
