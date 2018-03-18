@@ -222,7 +222,7 @@ public class Analyzer {
         }
     }
 
-    void perform(Parser parser) {
+    public void perform(Parser parser) {
         this.parser = parser;
         perform();
     }
