@@ -1,4 +1,4 @@
-package ru.liga;
+package ru.liga.tools;
 
 import com.leff.midi.MidiFile;
 import ru.liga.songtask.domain.SimpleMidiFile;
@@ -25,7 +25,7 @@ public class MidiFileCreator {
         }
     }
 
-    static File createMidiFile(String content, String fileName) {
+    static File createMidiFile(String fileName, String content) {
         SimpleMidiFile simpleMidiFile = new SimpleMidiFile(content);
         File file = createEmptyFile(fileName);
         try {
@@ -34,5 +34,27 @@ public class MidiFileCreator {
             e.printStackTrace();
         }
         return new File(fileName);
+    }
+
+    static File getMidiFile(String fileName) {
+        return getMidiFile(fileName, null);
+    }
+
+    static File getMidiFile(String fileName, String content) {
+        File file = new File(fileName);
+        if (file.exists()) {
+            return file;
+        }
+        if (content == null) {
+            return null;
+        }
+        return createMidiFile(fileName, content);
+    }
+    public static SimpleMidiFile getSimpleMidiFile(String fileName, String content) {
+        File file = getMidiFile(fileName, content);
+        if (file == null) {
+            return null;
+        }
+        return new SimpleMidiFile(file);
     }
 }

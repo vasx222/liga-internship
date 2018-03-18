@@ -1,4 +1,4 @@
-package ru.liga;
+package ru.liga.tools;
 
 import com.leff.midi.MidiFile;
 import com.leff.midi.MidiTrack;
@@ -6,7 +6,6 @@ import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.Tempo;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.slf4j.Logger;
 import ru.liga.songtask.domain.Note;
 import ru.liga.songtask.domain.SimpleMidiFile;
@@ -22,12 +21,12 @@ public class Analyzer {
 
     private Logger logger;
     private SimpleMidiFile simpleMidiFile;
-    private String fileName;
+    private Parser parser;
 
-    Analyzer(SimpleMidiFile simpleMidiFile, Logger logger, String fileName) {
+    public Analyzer(SimpleMidiFile simpleMidiFile, Logger logger, Parser parser) {
         this.logger = logger;
         this.simpleMidiFile = simpleMidiFile;
-        this.fileName = Parser.getName(fileName);
+        this.parser = parser;
     }
     private void write(String s, Writer writer) {
         logger.info(s);
@@ -115,7 +114,7 @@ public class Analyzer {
         }
     }
 
-    public void analyze() {
+    private void analyze() {
         write("Длительность (сек): " + simpleMidiFile.durationMs() / 1000, null);
         write("Всего нот: " + simpleMidiFile.vocalNoteList().size(), null);
         printRangeAnalysis(null);
@@ -123,8 +122,8 @@ public class Analyzer {
         printNoteHeightAnalysis(null);
         printIntervalAnalysis(null);
     }
-    public void analyzeCreateFile() {
-        try (Writer writer = new FileWriter(fileName + "_analysis.txt")) {
+    private void analyzeCreateFile() {
+        try (Writer writer = new FileWriter(parser.getFileName() + "_analysis.txt")) {
             write("Длительность (сек): " + simpleMidiFile.durationMs() / 1000, writer);
             write("Всего нот: " + simpleMidiFile.vocalNoteList().size(), writer);
             printRangeAnalysis(writer);
@@ -135,14 +134,15 @@ public class Analyzer {
             e.printStackTrace();
         }
     }
-    public void change(int trans, int tempo) {
+    private void change() {
         MidiFile midiFile = simpleMidiFile.getMidiFormat();
 
         for (MidiTrack midiTrack : midiFile.getTracks()) {
             for (MidiEvent midiEvent : midiTrack.getEvents()) {
                 if (midiEvent.getClass().equals(Tempo.class)) {
                     Tempo tempoEvent = (Tempo) midiEvent;
-                    tempoEvent.setBpm(tempoEvent.getBpm() * (100 + tempo) / 100);
+                    tempoEvent.setBpm(tempoEvent.getBpm() *
+                            (100 + parser.getCoefTempo()) / 100);
                 }
             }
         }
@@ -151,18 +151,21 @@ public class Analyzer {
             for (MidiEvent midiEvent : midiTrack.getEvents()) {
                 if (midiEvent.getClass().equals(NoteOn.class)) {
                     NoteOn noteOn = (NoteOn)midiEvent;
-                    noteOn.setNoteValue(noteOn.getNoteValue() + trans);
-                    //noteOn.setVelocity(noteOn.getVelocity() * (100 + tempo) / 100);
+                    noteOn.setNoteValue(noteOn.getNoteValue() + parser.getCoefTrans());
+                    /*noteOn.setVelocity(noteOn.getVelocity() *
+                            (100 + parser.getCoefTempo()) / 100);*/
                     continue;
                 }
                 if (midiEvent.getClass().equals(NoteOff.class)) {
                     NoteOff noteOff = (NoteOff)midiEvent;
-                    noteOff.setNoteValue(noteOff.getNoteValue() + trans);
-                    //noteOff.setVelocity(noteOff.getVelocity() * (100 + tempo) / 100);
+                    noteOff.setNoteValue(noteOff.getNoteValue() + parser.getCoefTrans());
+                    /*noteOff.setVelocity(noteOff.getVelocity() *
+                            (100 + parser.getCoefTempo()) / 100);*/
                 }
             }
         }
-        String newName = fileName + "-trans" + trans + "-tempo" + tempo + ".mid";
+        String newName = parser.getFileName() + "-trans" + parser.getCoefTrans() +
+                "-tempo" + parser.getCoefTempo() + ".mid";
         File file = new File(newName);
         try {
             if (file.exists()) {
@@ -202,5 +205,30 @@ public class Analyzer {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void perform() {
+        Integer operationType = parser.getOperationType();
+        if (operationType.equals(Parser.ANALYZE_CREATE_FILE)) {
+            analyzeCreateFile();
+            return;
+        }
+        if (operationType.equals(Parser.ANALYZE)) {
+            analyze();
+            return;
+        }
+        if (operationType.equals(Parser.CHANGE)) {
+            change();
+        }
+    }
+
+    void perform(Parser parser) {
+        this.parser = parser;
+        perform();
+    }
+
+    void perform(Parser parser, SimpleMidiFile simpleMidiFile) {
+        this.simpleMidiFile = simpleMidiFile;
+        perform(parser);
     }
 }

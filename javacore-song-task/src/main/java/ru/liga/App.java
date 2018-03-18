@@ -1,18 +1,13 @@
 package ru.liga;
 
-import com.leff.midi.MidiFile;
 import ru.liga.songtask.content.Content;
-import ru.liga.songtask.domain.Note;
 import ru.liga.songtask.domain.SimpleMidiFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.text.DecimalFormat;
-import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.liga.tools.Analyzer;
+import ru.liga.tools.MidiFileCreator;
+import ru.liga.tools.Parser;
 
 /**
  * Всего нот: 15
@@ -42,27 +37,16 @@ public class App {
 
     public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger(App.class);
-        Integer oper = Parser.parseArgs(args);
-        if (oper == null) {
-            logger.info("Incorrect input");
+        Parser parser;
+        try {
+            parser = new Parser(args);
+        } catch (Exception e) {
+            e.printStackTrace();
             return;
         }
-
-        String fileName = args[0];
-        /*SimpleMidiFile simpleMidiFile = new SimpleMidiFile(MidiFileCreator.
-                createMidiFile(Content.ZOMBIE, fileName));*/
-        SimpleMidiFile simpleMidiFile = new SimpleMidiFile(new File(fileName));
-        Analyzer analyzer = new Analyzer(simpleMidiFile, logger, fileName);
-        if (oper.equals(Parser.ANALYZE_CREATE_FILE)) {
-            analyzer.analyzeCreateFile();
-            return;
-        }
-        if (oper.equals(Parser.ANALYZE)) {
-            analyzer.analyze();
-            return;
-        }
-        if (oper.equals(Parser.CHANGE)) {
-            analyzer.change(Integer.valueOf(args[3]), Integer.valueOf(args[5]));
-        }
+        SimpleMidiFile simpleMidiFile = MidiFileCreator.
+                getSimpleMidiFile(parser.getFileFullName(), Content.ZOMBIE);
+        Analyzer analyzer = new Analyzer(simpleMidiFile, logger, parser);
+        analyzer.perform();
     }
 }
