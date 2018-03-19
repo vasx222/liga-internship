@@ -46,7 +46,7 @@ public class SimpleParametrizedTest {
     }
 
     @Test
-    public void simpleTest() throws Exception  {
+    public void primaryTest() throws Exception  {
         Parser parser = new Parser(args);
         analyzer.perform(parser);
     }

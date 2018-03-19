@@ -50,15 +50,20 @@ public class SomeTests {
     }
 
     @Test
-    public void testAnalyzeCreateFile() throws Exception {
+    public void testWritingAnalysisInFile() throws Exception {
         String[] args = {"zombie.mid", "analyze", "-f"};
         Parser parser = new Parser(args);
         analyzer.perform(parser);
         assertThat((new File("zombie_analysis.txt")).exists()).isTrue();
     }
 
+    /**
+     * This test creates new file with trans += 5 and tempo += 35%
+     * and compares it with the original file
+     * @throws Exception
+     */
     @Test
-    public void testChange() throws Exception {
+    public void testComparingDifferentFiles() throws Exception {
         String fileName = "zombie.mid";
         String[] args = {fileName, "change", "-trans", "5", "-tempo", "35"};
         Parser parser = new Parser(args);

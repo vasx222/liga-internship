@@ -33,6 +33,17 @@ import ru.liga.tools.Parser;
  * 5: 3
  * 11: 2
  */
+
+/**
+ * This program provides tools for working with midi files.
+ * It allows to analyze the content, write it to file and
+ * change some characteristics.
+ *
+ * @author N. Vasily
+ * @version 1.0
+ * @since 2018, March
+ */
+
 public class App {
 
     public static void main(String[] args) throws Exception {
