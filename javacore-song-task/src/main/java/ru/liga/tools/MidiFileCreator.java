@@ -1,13 +1,13 @@
 package ru.liga.tools;
 
-import com.leff.midi.MidiFile;
+import ru.liga.songtask.content.Content;
 import ru.liga.songtask.domain.SimpleMidiFile;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MidiFileCreator {
-    static private File createEmptyFile(String fileName) {
+    public static File createEmptyFile(String fileName) {
         try {
             File file = new File(fileName);
             if (file.exists()) {
@@ -25,8 +25,8 @@ public class MidiFileCreator {
         }
     }
 
-    static File createMidiFile(String fileName, String content) {
-        SimpleMidiFile simpleMidiFile = new SimpleMidiFile(content);
+    public static File createDefaultMidiFile(String fileName) {
+        SimpleMidiFile simpleMidiFile = new SimpleMidiFile(Content.ZOMBIE);
         File file = createEmptyFile(fileName);
         try {
             simpleMidiFile.getMidiFormat().writeToFile(file);
@@ -36,22 +36,15 @@ public class MidiFileCreator {
         return new File(fileName);
     }
 
-    static File getMidiFile(String fileName) {
-        return getMidiFile(fileName, null);
-    }
-
-    static File getMidiFile(String fileName, String content) {
+    public static File getMidiFile(String fileName) {
         File file = new File(fileName);
         if (file.exists()) {
             return file;
         }
-        if (content == null) {
-            return null;
-        }
-        return createMidiFile(fileName, content);
+        return createDefaultMidiFile(fileName);
     }
-    public static SimpleMidiFile getSimpleMidiFile(String fileName, String content) {
-        File file = getMidiFile(fileName, content);
+    public static SimpleMidiFile getSimpleMidiFile(String fileName) {
+        File file = getMidiFile(fileName);
         if (file == null) {
             return null;
         }

@@ -7,6 +7,7 @@ import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.Tempo;
 import org.slf4j.Logger;
+import ru.liga.songtask.content.Content;
 import ru.liga.songtask.domain.Note;
 import ru.liga.songtask.domain.SimpleMidiFile;
 
@@ -23,10 +24,16 @@ public class Analyzer {
     private SimpleMidiFile simpleMidiFile;
     private Parser parser;
 
-    public Analyzer(SimpleMidiFile simpleMidiFile, Logger logger, Parser parser) {
+    public Analyzer(Logger logger, Parser parser) {
         this.logger = logger;
-        this.simpleMidiFile = simpleMidiFile;
         this.parser = parser;
+        if (parser != null) {
+            this.simpleMidiFile = MidiFileCreator.
+                    getSimpleMidiFile(parser.getFileFullName());
+        } else {
+            this.simpleMidiFile = null;
+        }
+
     }
     private void write(String s, Writer writer) {
         logger.info(s);
@@ -184,7 +191,7 @@ public class Analyzer {
         }
     }
 
-    static Boolean compareMidiFiles(String fileName1, String fileName2) {
+    public static Boolean compareMidiFiles(String fileName1, String fileName2) {
         try {
             SimpleMidiFile mf1 = new SimpleMidiFile(new File(fileName1)),
                     mf2 = new SimpleMidiFile(new File(fileName2));
@@ -194,8 +201,8 @@ public class Analyzer {
             for (int i = 0; i < mf1.vocalNoteList().size(); i++) {
                 Note n1 = mf1.vocalNoteList().get(i),
                         n2 = mf2.vocalNoteList().get(i);
-                if (!n1.durationTicks().equals(n2.startTick()) ||
-                        !n1.startTick().equals(n2.startTick()) ||
+                if (!n1.startTick().equals(n2.startTick()) ||
+                        !n1.durationTicks().equals(n2.durationTicks()) ||
                         !n1.sign().getFrequencyHz().equals(n2.sign().getFrequencyHz())) {
                     return false;
                 }
@@ -207,7 +214,10 @@ public class Analyzer {
         }
     }
 
-    public void perform() {
+    public void perform() throws Exception {
+        if (parser == null) {
+            throw new Exception("No parameters specified!");
+        }
         Integer operationType = parser.getOperationType();
         if (operationType.equals(Parser.ANALYZE_CREATE_FILE)) {
             analyzeCreateFile();
@@ -222,13 +232,13 @@ public class Analyzer {
         }
     }
 
-    public void perform(Parser parser) {
+    public void perform(Parser parser) throws Exception {
+        if (parser == null) {
+            throw new Exception("No parameters specified!");
+        }
         this.parser = parser;
+        this.simpleMidiFile = MidiFileCreator.
+                getSimpleMidiFile(parser.getFileFullName());
         perform();
-    }
-
-    void perform(Parser parser, SimpleMidiFile simpleMidiFile) {
-        this.simpleMidiFile = simpleMidiFile;
-        perform(parser);
     }
 }

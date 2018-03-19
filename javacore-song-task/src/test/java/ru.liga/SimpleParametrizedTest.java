@@ -28,8 +28,8 @@ public class SimpleParametrizedTest {
     public static void initLogger() {
         logger = LoggerFactory.getLogger(App.class);
         simpleMidiFile = MidiFileCreator.
-                getSimpleMidiFile(fileName, Content.ZOMBIE);
-        analyzer = new Analyzer(simpleMidiFile, logger, null);
+                getSimpleMidiFile(fileName);
+        analyzer = new Analyzer(logger, null);
     }
 
     @Parameterized.Parameter
@@ -46,14 +46,8 @@ public class SimpleParametrizedTest {
     }
 
     @Test
-    public void simpleTest() {
-        Parser parser;
-        try {
-            parser = new Parser(args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
+    public void simpleTest() throws Exception  {
+        Parser parser = new Parser(args);
         analyzer.perform(parser);
     }
 }

@@ -35,7 +35,7 @@ import ru.liga.tools.Parser;
  */
 public class App {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Logger logger = LoggerFactory.getLogger(App.class);
         Parser parser;
         try {
@@ -44,9 +44,8 @@ public class App {
             e.printStackTrace();
             return;
         }
-        SimpleMidiFile simpleMidiFile = MidiFileCreator.
-                getSimpleMidiFile(parser.getFileFullName(), Content.ZOMBIE);
-        Analyzer analyzer = new Analyzer(simpleMidiFile, logger, parser);
+
+        Analyzer analyzer = new Analyzer(logger, parser);
         analyzer.perform();
     }
 }
